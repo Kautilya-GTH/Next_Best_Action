@@ -1,0 +1,58 @@
+# Example scoring configuration. EVERY number and name in this file is a
+# PLACEHOLDER invented for the synthetic MVP. Replace with your own values.
+
+# Accounts with arr below this are dropped before ranking.
+min_value: 10000          # PLACEHOLDER (compared against arr)
+
+# Renewal normalization: min(1, renewal_k / days_to_renewal); days <= 0 -> 1.
+renewal_k: 60             # PLACEHOLDER
+
+# Optional cap on normalized money signals (arr, pipeline). 1.0 means anything
+# >= 100,000 counts the same. null = no cap (bigger is always better).
+money_cap: null          # PLACEHOLDER (e.g. 1.0)
+
+# Rescale enabled weights within each opportunity type so they sum to 1.
+# Every type then scores on the same scale and no type wins just because its
+# weights add up to more. Weights below act as relative importance within a type.
+normalize_weights: true
+
+# Default number of accounts per owner digest (CLI --top-n overrides).
+top_n: 3
+
+# Normalization kind for every signal a rule may reference.
+# Kinds: bool | money | percent | renewal
+# arr, usage_score, days_to_renewal, seat_utilization come from accounts.csv;
+# the rest come from signals.csv.
+signals:
+  arr: money
+  usage_score: percent
+  days_to_renewal: renewal
+  seat_utilization: percent      # derived: min(100, active_users / seats_purchased * 100)
+  has_budget_signal: bool        # PLACEHOLDER signal name
+  in_renewal_window: bool        # PLACEHOLDER signal name
+  has_exec_sponsor: bool         # PLACEHOLDER signal name
+  open_pipeline_amount: money    # PLACEHOLDER signal name
+  feature_adoption_pct: percent  # PLACEHOLDER signal name
+  support_escalation: bool       # PLACEHOLDER signal name
+
+# Opportunity types and their gate signal (must be a bool signal).
+# If the gate is false or missing, the type scores exactly 0.
+opportunity_types:
+  expansion:
+    gate: has_budget_signal      # PLACEHOLDER
+  renewal:
+    gate: in_renewal_window      # PLACEHOLDER
+  adoption:
+    gate: has_exec_sponsor       # PLACEHOLDER
+
+# Rules: one row per (opportunity_type, signal_name). All weights PLACEHOLDER.
+rules:
+  - {opportunity_type: expansion, signal_name: seat_utilization,     weight: 1.0,  enabled: true}
+  - {opportunity_type: expansion, signal_name: open_pipeline_amount, weight: 0.8,  enabled: true}
+  - {opportunity_type: expansion, signal_name: arr,                  weight: 0.2,  enabled: true}
+  - {opportunity_type: renewal,   signal_name: days_to_renewal,      weight: 1.0,  enabled: true}
+  - {opportunity_type: renewal,   signal_name: arr,                  weight: 0.5,  enabled: true}
+  - {opportunity_type: renewal,   signal_name: support_escalation,   weight: 0.4,  enabled: true}
+  - {opportunity_type: adoption,  signal_name: usage_score,          weight: 0.6, enabled: true}
+  - {opportunity_type: adoption,  signal_name: feature_adoption_pct, weight: 0.4, enabled: true}
+  - {opportunity_type: adoption,  signal_name: seat_utilization,     weight: 0.5,  enabled: false}
